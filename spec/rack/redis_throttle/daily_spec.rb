@@ -4,8 +4,7 @@ describe Rack::RedisThrottle::Daily do
 
   # middleware settings
   before { app.options[:max]   = 5000 }
-  before { app.options[:cache] = MockRedis.new }
-
+  before { app.options[:cache] = ConnectionPool.new { MockRedis.new } }
 
   let(:cache)      { app.options[:cache] }
 
@@ -16,8 +15,8 @@ describe Rack::RedisThrottle::Daily do
   let(:tomorrow_time_key)  { Time.now.tomorrow.utc.strftime('%Y-%m-%d') }
   let(:tomorrow_cache_key) { "#{client_key}:#{tomorrow_time_key}" }
 
-  before { cache.set cache_key, 1 }
-  before { cache.set tomorrow_cache_key, 1 }
+  before { cache.with { |c| c.set cache_key, 1 } }
+  before { cache.with { |c| c.set tomorrow_cache_key, 1 } }
 
   describe 'when makes a request' do
 
@@ -48,7 +47,7 @@ describe Rack::RedisThrottle::Daily do
 
       describe 'when reaches the rate limit' do
 
-        before { cache.set cache_key, 5000 }
+        before { cache.with { |c| c.set cache_key, 5000 } }
         before { get '/foo' }
 
         it 'returns a 403 status' do

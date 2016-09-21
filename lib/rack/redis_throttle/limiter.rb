@@ -33,12 +33,16 @@ module Rack
       end
 
       def cache_has?(key)
-        cache.get(key) rescue false
+        cache.with do |c|
+          c.exists(key)
+        end
       end
 
       def cache_get(key, default = nil)
         begin
-          cache.get(key) || default
+        cache.with do |c|
+          c.get(key) || default
+        end
         rescue Redis::BaseConnectionError => e
           puts "ERROR: Redis connection not available. Rescuing cache.get(key)" if ENV['DEBUG']
           return 0
@@ -46,15 +50,19 @@ module Rack
       end
 
       def cache_set(key, value)
-        cache.set(key, value) rescue 0
+        cache.with do |c|
+          c.set(key, value) rescue 0
+        end
       end
 
       def cache_incr(request)
         begin
-          key   = cache_key(request)
-          count = cache.incr(key)
-          cache.expire(key, 1.day) if count == 1
-          count
+          key = cache_key(request)
+          cache.with do |c|
+            count = c.incr(key)
+            c.expire(key, 1.day) if count == 1
+            count
+          end
         rescue Redis::BaseConnectionError => e
           puts "ERROR: Redis connection not available. Rescuing cache.incr(key)" if ENV['DEBUG']
           return 0

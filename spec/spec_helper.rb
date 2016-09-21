@@ -5,6 +5,8 @@ require 'rack/test'
 require 'mock_redis'
 require 'rspec'
 require 'timecop'
+require 'connection_pool'
+require 'pry'
 
 require File.dirname(__FILE__) + '/fixtures/fake_app'
 
