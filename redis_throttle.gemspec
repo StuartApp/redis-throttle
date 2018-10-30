@@ -16,11 +16,9 @@ Gem::Specification.new do |gem|
   gem.files              = %w(CONTRIBUTORS.md README.md LICENSE.md VERSION) + Dir.glob('lib/**/*.rb')
   gem.bindir             = %q(bin)
   gem.executables        = %w()
-  gem.default_executable = gem.executables.first
   gem.require_paths      = %w(lib)
   gem.extensions         = %w()
   gem.test_files         = %w()
-  gem.has_rdoc           = false
 
   gem.rubyforge_project    = 'redis-throttle'
   gem.post_install_message = nil
